@@ -4,6 +4,7 @@ mod visualizer;
 
 use glam::dvec2;
 use model::{Destination, Obstacle, Pedestrian, State};
+use visualizer::Visualizer;
 
 fn main() {
     std::fs::create_dir("output").ok();
@@ -11,7 +12,7 @@ fn main() {
         .format("output/%Y-%m-%d_%H-%M-%S.gif")
         .to_string();
     let mut visualizer =
-        visualizer::Visualizer::new(&output_path, [dvec2(0.0, 0.0), dvec2(10.0, 4.0)], 64.0, 50);
+        Visualizer::new(&output_path, [dvec2(0.0, 0.0), dvec2(10.0, 4.0)], 64.0, 100);
 
     let mut state = State::default();
 

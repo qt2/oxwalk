@@ -41,6 +41,6 @@ mod tests {
         let line = [dvec2(0.0, 0.0), dvec2(1.0, 1.0)];
         let point = dvec2(1.0, 0.0);
         let nearest_point = nearest_point_on_line_segment(point, line);
-        assert_eq!(nearest_point, dvec2(0.5, 0.5));
+        assert!((nearest_point - dvec2(0.5, 0.5)).length() < 1e-10);
     }
 }

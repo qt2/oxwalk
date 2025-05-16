@@ -39,7 +39,8 @@ impl State {
                     self_p.position,
                     self.destinations[self_p.destination_id].vertices,
                 );
-                let desired_move_dir = (target - self_p.position).normalize();
+
+                let desired_move_dir = (target - self_p.position).normalize_or_zero();
                 acceleration += (desired_move_dir * self_p.desired_speed - self_p.velocity) / 0.5;
 
                 for other_id in 0..pedestrians.len() {
@@ -54,7 +55,7 @@ impl State {
 
                         if distance > 0.0 && distance <= 3.0 {
                             let direction = diff / distance;
-                            let t1 = diff - self_p.velocity * TIME_STEP;
+                            let t1 = diff - other_p.velocity * TIME_STEP;
                             let t1_length = t1.length();
                             let t2 = distance + t1_length;
 
