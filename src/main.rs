@@ -17,25 +17,20 @@ fn main() {
     let mut state = State::default();
 
     // Destination #0
-    state.add_destination(Destination::from_line_segment([
-        dvec2(1.0, 1.0),
-        dvec2(1.0, 3.0),
-    ]));
+    state.add_destination(Destination::new(vec![dvec2(1.0, 1.0), dvec2(1.0, 3.0)]));
 
     // Destination #1
-    state.add_destination(Destination::from_line_segment([
-        dvec2(9.0, 1.0),
-        dvec2(9.0, 3.0),
-    ]));
+    state.add_destination(Destination::new(vec![dvec2(9.0, 1.0), dvec2(9.0, 3.0)]));
 
     // Obstacles
-    state.add_obstacle(Obstacle::from_line_segment([
-        dvec2(0.0, 0.0),
-        dvec2(10.0, 0.0),
-    ]));
-    state.add_obstacle(Obstacle::from_line_segment([
-        dvec2(0.0, 4.0),
-        dvec2(10.0, 4.0),
+    state.add_obstacle(Obstacle::new(vec![dvec2(0.0, 0.0), dvec2(10.0, 0.0)]));
+    state.add_obstacle(Obstacle::new(vec![dvec2(0.0, 4.0), dvec2(10.0, 4.0)]));
+    state.add_obstacle(Obstacle::new(vec![
+        dvec2(5.0, 1.0),
+        dvec2(6.0, 2.0),
+        dvec2(5.0, 3.0),
+        dvec2(4.0, 2.0),
+        dvec2(5.0, 1.0),
     ]));
 
     for step in 0..1000 {
