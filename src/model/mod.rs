@@ -4,7 +4,7 @@ use crate::util;
 
 /// Simulation time step in seconds.
 pub const TIME_STEP: f64 = 1.0 / 10.0;
-/// Cosine of phi (2*phi represents the effective angle of sight of pedestrians)
+/// Cosine of phi (2*phi represents the effective angle of sight of pedestrians).
 const COS_PHI: f64 = -0.17364817766693036; // cos(100 degrees)
 
 #[derive(Debug, Default)]
@@ -37,7 +37,7 @@ impl State {
 
                 let target = util::nearest_point_on_line_segment(
                     self_p.position,
-                    self.destinations[self_p.destination_id].vertices,
+                    self.destinations[self_p.destination_id].points,
                 );
 
                 let desired_move_dir = (target - self_p.position).normalize_or_zero();
@@ -76,7 +76,7 @@ impl State {
 
                 for obstacle in &self.obstacles {
                     let nearest_point =
-                        util::nearest_point_on_line_segment(self_p.position, obstacle.vertices);
+                        util::nearest_point_on_line_segment(self_p.position, obstacle.points);
                     let diff = self_p.position - nearest_point;
                     let distance = diff.length();
 
@@ -102,7 +102,7 @@ impl State {
 
                 let target = util::nearest_point_on_line_segment(
                     pedestrian.position,
-                    self.destinations[pedestrian.destination_id].vertices,
+                    self.destinations[pedestrian.destination_id].points,
                 );
                 let distance = (target - pedestrian.position).length_squared();
                 if distance < 0.2f64.powi(2) {
@@ -142,26 +142,23 @@ impl Default for Pedestrian {
 
 #[derive(Debug, Clone)]
 pub struct Obstacle {
-    /// Vertices of the obstacle.
-    /// The obstacle is represented as a line segment between the two vertices.
-    pub vertices: [DVec2; 2],
+    /// Line segment representing the obstacle.
+    pub points: [DVec2; 2],
 }
 
 impl Obstacle {
-    pub fn from_line_segment(vertices: [DVec2; 2]) -> Self {
-        Obstacle { vertices }
+    pub fn from_line_segment(points: [DVec2; 2]) -> Self {
+        Obstacle { points }
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct Destination {
-    /// Vertex of the destination.
-    /// The destination is represented as a line segment between the two vertices.
-    pub vertices: [DVec2; 2],
+    pub points: [DVec2; 2],
 }
 
 impl Destination {
-    pub fn from_line_segment(vertices: [DVec2; 2]) -> Self {
-        Destination { vertices }
+    pub fn from_line_segment(points: [DVec2; 2]) -> Self {
+        Destination { points }
     }
 }

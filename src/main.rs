@@ -60,9 +60,10 @@ fn main() {
             visualizer.render(step, &state);
         }
         if step % 100 == 0 {
-            println!("Step {}: {} pedestrians", step, state.pedestrians.len());
+            let active_pedestrians = state.pedestrians.iter().filter(|p| p.active).count();
+            println!("Step {step}: {active_pedestrians} pedestrians");
         }
     }
 
-    println!("Simulation finished. Output saved to {}", output_path);
+    println!("Simulation finished. Output saved to {output_path}");
 }

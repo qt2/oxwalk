@@ -5,13 +5,22 @@ use crate::model::State;
 
 const COLORS: &[RGBColor] = &[BLUE, RED, GREEN, YELLOW, CYAN, MAGENTA];
 
+/// Visualizer for the simulation.
+///
+/// This struct is responsible for rendering the simulation state to a GIF file.
 pub struct Visualizer<'a> {
-    root: DrawingArea<BitMapBackend<'a>, Shift>,
+    canvas: DrawingArea<BitMapBackend<'a>, Shift>,
     render_rect: [DVec2; 2],
     resolution: f64,
 }
 
 impl<'a> Visualizer<'a> {
+    /// Creates a new visualizer.
+    ///
+    /// - `output_path`: Path to the output GIF file.
+    /// - `render_rect`: The rectangle in world coordinates that will be rendered.
+    /// - `resolution`: The number of pixels per unit in the render rectangle.
+    /// - `frame_delay`: Delay between frames in milliseconds.
     pub fn new(
         output_path: &str,
         render_rect: [DVec2; 2],
@@ -19,74 +28,64 @@ impl<'a> Visualizer<'a> {
         frame_delay: u32,
     ) -> Self {
         let image_size = ((render_rect[1] - render_rect[0]) * resolution).as_uvec2();
-        let root = BitMapBackend::gif(output_path, image_size.into(), frame_delay)
+        let canvas = BitMapBackend::gif(output_path, image_size.into(), frame_delay)
             .unwrap()
             .into_drawing_area();
         Self {
-            root,
+            canvas,
             render_rect,
             resolution,
         }
     }
 
+    /// Renders the current state of the simulation.
     pub fn render(&mut self, _step: i32, state: &State) {
-        let canvas = &mut self.root;
-        canvas.fill(&WHITE).unwrap();
+        self.canvas.fill(&WHITE).unwrap();
 
         for obstacle in &state.obstacles {
-            let points: Vec<_> = obstacle
-                .vertices
-                .iter()
-                .map(|v| {
-                    ((v - self.render_rect[0]) * self.resolution)
-                        .as_ivec2()
-                        .into()
-                })
-                .collect();
-
-            canvas
-                .draw(&PathElement::new(
-                    points,
-                    GREY_500.stroke_width((0.25 * self.resolution) as u32),
-                ))
-                .unwrap();
+            let style = GREY_500.stroke_width((0.25 * self.resolution) as u32);
+            self.draw_path(&obstacle.points, style);
         }
 
         for destination in &state.destinations {
-            let points: Vec<_> = destination
-                .vertices
-                .iter()
-                .map(|v| {
-                    ((v - self.render_rect[0]) * self.resolution)
-                        .as_ivec2()
-                        .into()
-                })
-                .collect();
-
-            canvas
-                .draw(&PathElement::new(
-                    points,
-                    BLACK.stroke_width((0.25 * self.resolution) as u32),
-                ))
-                .unwrap();
+            let style = BLACK.stroke_width((0.25 * self.resolution) as u32);
+            self.draw_path(&destination.points, style);
         }
 
         for pedestrian in &state.pedestrians {
             if pedestrian.active {
-                let coord =
-                    ((pedestrian.position - self.render_rect[0]) * self.resolution).as_ivec2();
                 let color = COLORS[pedestrian.destination_id as usize % COLORS.len()];
-
-                canvas
-                    .draw(&Circle::new(
-                        coord.into(),
-                        (0.2 * self.resolution) as i32,
-                        color.filled(),
-                    ))
-                    .unwrap();
+                self.draw_circle(pedestrian.position, 0.2, color.filled());
             }
         }
 
-        self.root.present().unwrap();
+        self.canvas.present().unwrap();
+    }
+
+    /// Draws a circle at the given position with the specified radius and style.
+    /// The position is in world coordinates, and the radius is in world units.
+    fn draw_circle(&self, position: DVec2, radius: f64, style: impl Into<ShapeStyle>) {
+        let coord = ((position - self.render_rect[0]) * self.resolution).as_ivec2();
+        self.canvas
+            .draw(&Circle::new(
+                coord.into(),
+                (radius * self.resolution) as i32,
+                style,
+            ))
+            .unwrap();
+    }
+
+    /// Draws a path defined by a series of points.
+    /// The points are in world coordinates.
+    fn draw_path(&self, points: &[DVec2], style: impl Into<ShapeStyle>) {
+        let points: Vec<(i32, i32)> = points
+            .iter()
+            .map(|v| {
+                ((v - self.render_rect[0]) * self.resolution)
+                    .as_ivec2()
+                    .into()
+            })
+            .collect();
+        self.canvas.draw(&PathElement::new(points, style)).unwrap();
     }
 }
