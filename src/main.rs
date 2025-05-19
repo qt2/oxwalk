@@ -33,15 +33,19 @@ fn main() {
         dvec2(5.0, 1.0),
     ]));
 
+    // Main loop
     for step in 0..1000 {
-        for _ in 0..util::poisson(0.1) {
+        // Spawn pedestrians at random intervals
+        for _ in 0..util::poisson(0.05) {
+            // Spawn pedestrians moving to the right
             state.spawn_pedestrian(Pedestrian {
                 position: dvec2(1.0, 1.0 + fastrand::f64() * 2.0),
                 destination_id: 1,
                 ..Default::default()
             });
         }
-        for _ in 0..util::poisson(0.1) {
+        for _ in 0..util::poisson(0.05) {
+            // Spawn pedestrians moving to the left
             state.spawn_pedestrian(Pedestrian {
                 position: dvec2(9.0, 1.0 + fastrand::f64() * 2.0),
                 destination_id: 0,
@@ -49,11 +53,14 @@ fn main() {
             });
         }
 
+        // Update pedestrians
         state.tick();
 
+        // Render the state every 2 steps
         if step % 2 == 0 {
             visualizer.render(step, &state);
         }
+        // Show the progress every 100 steps
         if step % 100 == 0 {
             let active_pedestrians = state.pedestrians.iter().filter(|p| p.active).count();
             println!("Step {step}: {active_pedestrians} pedestrians");

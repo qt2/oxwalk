@@ -16,35 +16,41 @@ pub struct State {
 }
 
 impl State {
+    /// Spawns a new pedestrian.
     pub fn spawn_pedestrian(&mut self, pedestrian: Pedestrian) {
         self.pedestrians.push(pedestrian);
     }
 
+    /// Adds an obstacle to the simulation.
     pub fn add_obstacle(&mut self, obstacle: Obstacle) {
         self.obstacles.push(obstacle);
     }
 
+    /// Adds a destination to the simulation.
     pub fn add_destination(&mut self, destination: Destination) {
         self.destinations.push(destination);
     }
 
+    /// Updates the state of the simulation.
     pub fn tick(&mut self) {
         let pedestrians = &mut self.pedestrians;
 
+        // Calculate the accelerations for each pedestrian.
         let accelerations = pedestrians
             .iter()
             .enumerate()
             .map(|(self_id, self_p)| {
                 let mut acceleration = DVec2::ZERO;
 
+                // Calculate the acceleration term towards the destination.
                 let target = util::nearest_point_on_path(
                     self_p.position,
                     &self.destinations[self_p.destination_id].points,
                 );
-
                 let desired_move_dir = (target - self_p.position).normalize_or_zero();
                 acceleration += (desired_move_dir * self_p.desired_speed - self_p.velocity) / 0.5;
 
+                // Calculate the repulsive forces from other pedestrians and obstacles.
                 for other_id in 0..pedestrians.len() {
                     if self_id != other_id {
                         let other_p = &pedestrians[other_id];
@@ -76,6 +82,7 @@ impl State {
                     }
                 }
 
+                // Calculate the repulsive forces from obstacles.
                 for obstacle in &self.obstacles {
                     let nearest_point =
                         util::nearest_point_on_path(self_p.position, &obstacle.points);
@@ -84,7 +91,7 @@ impl State {
 
                     if distance > 0.0 && distance <= 3.0 {
                         let direction = diff / distance;
-                        let force = 100.0 * 0.2 * (-distance / 0.2).exp() * direction;
+                        let force = 10.0 / 0.2 * (-distance / 0.2).exp() * direction;
                         acceleration += force;
                     }
                 }
@@ -93,6 +100,8 @@ impl State {
             })
             .collect::<Vec<_>>();
 
+        // Update the position and velocity of each pedestrian.
+        // The position is updated using Heun's method.
         for (i, pedestrian) in pedestrians.iter_mut().enumerate() {
             if pedestrian.active {
                 let velocity_current = pedestrian.velocity;
