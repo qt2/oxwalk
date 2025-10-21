@@ -1,3 +1,4 @@
+mod fmm;
 mod model;
 mod util;
 mod visualizer;

@@ -8,6 +8,7 @@ chrono = "0.4.41"
 fastrand = "2.3.0"
 fastrand-contrib = "0.1.0"
 glam = "0.30.3"
+ndarray = "0.16.1"
 plotters = { version = "0.3.7", default-features = false, features = [
     "bitmap_backend",
     "bitmap_gif",
