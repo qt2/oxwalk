@@ -54,7 +54,7 @@ pub fn apply_fmm(field: &mut Array2<f64>, scale_factor: f64, n: impl Fn((usize, 
         }
     }
 
-    while let Some(Cell { u, index }) = heap.pop() {
+    while let Some(Cell { index, .. }) = heap.pop() {
         if fixed[index] {
             continue;
         }
@@ -62,14 +62,6 @@ pub fn apply_fmm(field: &mut Array2<f64>, scale_factor: f64, n: impl Fn((usize, 
         fixed[index] = true;
 
         for delta in [(-1, 0), (1, 0), (0, -1), (0, 1)] {
-            // let index_n = match (
-            //     index.0.checked_add_signed(delta.0),
-            //     index.1.checked_add_signed(delta.1),
-            // ) {
-            //     (Some(y), Some(x)) if y < dim.0 && x < dim.1 => (y, x),
-            //     _ => continue,
-            // };
-
             let Some(index_n) = index_add(index, delta) else {
                 continue;
             };
